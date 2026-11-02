@@ -1,0 +1,13 @@
+# Keep line endings stable on Windows and Linux (shell scripts must stay LF to run in Git Bash / WSL).
+* text=auto
+*.sh   text eol=lf
+*.py   text eol=lf
+*.js   text eol=lf
+*.json text eol=lf
+*.html text eol=lf
+*.md   text eol=lf
+*.yml  text eol=lf
+*.mp4  binary
+*.jpg  binary
+*.png  binary
+*.onnx binary

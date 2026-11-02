@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Ubuntu runners block unprivileged user namespaces, which Chromium's sandbox needs.
+      # The separate "sandbox-check" job tries the sandboxed launch without this opt-out.
+      TOPIC2REEL_NO_SANDBOX: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: System packages
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg fonts-noto-color-emoji fonts-inter
+      - run: pip install -r requirements.txt
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Static checks
+        run: |
+          bash -n scripts/get_voice.sh
+          python3 -m json.tool .claude-plugin/plugin.json > /dev/null
+          python3 -m json.tool .claude-plugin/marketplace.json > /dev/null
+          for f in examples/*.json; do python3 engine/topic2reel.py "$f" --validate; done
+      - name: Doctor
+        run: python3 engine/topic2reel.py --doctor
+      - name: Tests (voice tests skip without a Piper model)
+        run: python3 -m unittest discover -s tests -v
+
+  sandbox-check:
+    # Informational: shows whether Chromium can run with its sandbox on a GitHub runner. It never fails the build.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Allow unprivileged user namespaces (needed by the browser sandbox)
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+      - name: Launch with the sandbox on
+        run: node tests/sandbox_policy.js

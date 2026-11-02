@@ -4,7 +4,7 @@
 //   route_blocked   -> Playwright's route handler aborted the request (layer 2, tested on a page WITHOUT a CSP)
 const { chromium } = require('playwright');
 const path = require('path');
-const { lockdown, launchArgs, CONTEXT_OPTIONS, blocked } = require('../engine/render/lockdown');
+const { lockdown, launchOptions, CONTEXT_OPTIONS, blocked } = require('../engine/render/lockdown');
 
 const attempts = () => new Promise(resolve => {
   const wait = setup => new Promise(r => { const t = setTimeout(() => r('TIMEOUT'), 8000); setup(v => { clearTimeout(t); r(v); }); });
@@ -17,7 +17,7 @@ const attempts = () => new Promise(resolve => {
 });
 
 (async () => {
-  const browser = await chromium.launch({ args: launchArgs() });
+  const browser = await chromium.launch(launchOptions());
   const context = await browser.newContext(CONTEXT_OPTIONS);
   await lockdown(context);
 

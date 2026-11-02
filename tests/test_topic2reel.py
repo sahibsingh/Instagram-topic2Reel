@@ -114,6 +114,12 @@ class Browser(unittest.TestCase):
         self.assertGreaterEqual(res["csp_violations"], 1, "CSP layer did not fire")
         self.assertGreaterEqual(res["route_blocked"], 1, "route-abort layer did not fire")
 
+    def test_sandbox_policy_and_real_launch(self):
+        r = subprocess.run(["node", str(ROOT / "tests" / "sandbox_policy.js")], capture_output=True, text=True, cwd=ROOT, timeout=120)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        res = json.loads(r.stdout.strip().splitlines()[-1])
+        self.assertEqual(res["policy"], {"user": True, "root": False, "optOut": False})
+
     def test_hostile_text_is_only_drawn_never_executed(self):
         spec = good_spec()
         spec["scenes"][0]["headline"] = ["<img src=x onerror=1>", "'\";alert(1);//"]

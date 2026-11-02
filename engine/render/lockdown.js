@@ -16,10 +16,12 @@ async function lockdown(context) {
   });
 }
 
-// Chromium refuses to run as root without --no-sandbox (typical in containers). Keep the sandbox otherwise.
-function launchArgs() {
+// Playwright starts Chromium with --no-sandbox unless chromiumSandbox is true, so the sandbox must be asked for explicitly.
+// Chromium cannot use its sandbox as root (typical in containers), and some hosts block unprivileged user namespaces
+// (for example Ubuntu 24.04); TOPIC2REEL_NO_SANDBOX=1 is the explicit, visible opt-out for those cases.
+function launchOptions() {
   const isRoot = typeof process.getuid === 'function' && process.getuid() === 0;
-  return isRoot || process.env.TOPIC2REEL_NO_SANDBOX === '1' ? ['--no-sandbox'] : [];
+  return { chromiumSandbox: !(isRoot || process.env.TOPIC2REEL_NO_SANDBOX === '1') };
 }
 
 const CONTEXT_OPTIONS = {
@@ -27,4 +29,4 @@ const CONTEXT_OPTIONS = {
   serviceWorkers: 'block', acceptDownloads: false, permissions: [], javaScriptEnabled: true,
 };
 
-module.exports = { lockdown, launchArgs, CONTEXT_OPTIONS, blocked, ROOT };
+module.exports = { lockdown, launchOptions, CONTEXT_OPTIONS, blocked, ROOT };

@@ -5,7 +5,7 @@ const { chromium } = require('playwright');
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
-const { lockdown, launchArgs, CONTEXT_OPTIONS } = require('./lockdown');
+const { lockdown, launchOptions, CONTEXT_OPTIONS } = require('./lockdown');
 
 const FPS = 30;
 const MAX_FRAMES = FPS * 600;           // hard cap: 10 minutes of video
@@ -22,7 +22,12 @@ const frames = Math.round(durs.reduce((a, b) => a + b, 0) * FPS);
 if (frames > MAX_FRAMES) fail('video too long');
 
 (async () => {
-  const browser = await chromium.launch({ args: launchArgs() });
+  let browser;
+  try { browser = await chromium.launch(launchOptions()); } catch (e) {
+    console.error('Chromium could not start with its sandbox: ' + String(e.message).split('\n')[0]);
+    console.error('If this host blocks user namespaces (some containers, Ubuntu 24.04), set TOPIC2REEL_NO_SANDBOX=1 after reading SECURITY.md.');
+    process.exit(1);
+  }
   const context = await browser.newContext(CONTEXT_OPTIONS);
   await lockdown(context);
   const page = await context.newPage();

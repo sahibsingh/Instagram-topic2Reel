@@ -95,7 +95,7 @@ Hindi words such as फल keep `pʰ`. It is **off by default**; the phonemes we
 
 ## Tests
 ```bash
-python3 -m unittest discover -s tests -v    # 17 tests; the browser and voice ones skip if Node/Piper are missing
+python3 -m unittest discover -s tests -v    # 18 tests; the browser and voice ones skip if Node/Piper are missing
 ```
 
 ## Layout
@@ -105,7 +105,13 @@ skills/reel/      the /reel workflow for Claude
 engine/           topic2reel.py (CLI + library) and render/ (the scene renderer, runs in a locked-down headless Chromium)
 prompts/ schema/ examples/
 tests/  scripts/  docs/ (demo page)
+.github/         CI, Dependabot, issue and PR templates
 ```
+
+## Contributing and security
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md). The render browser has no network access and runs with Chromium's
+sandbox for normal users. If your machine cannot start the sandbox (some containers, Ubuntu 24.04), Chromium fails with a clear message;
+set `TOPIC2REEL_NO_SANDBOX=1` only after reading SECURITY.md. Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 ## Licence
 The code in this repository is released under the [MIT License](LICENSE). Note that `piper-tts` is **GPL-3.0-or-later**: this project

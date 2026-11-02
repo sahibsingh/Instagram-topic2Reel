@@ -17,7 +17,7 @@ the third-party programs the project drives (Chromium, Playwright, ffmpeg, Piper
 ## Findings and status
 | # | Finding | Risk | Status |
 |---|---|---|---|
-| 1 | Chromium was always started with `--no-sandbox` | Medium: a browser bug would run unsandboxed | **Fixed.** Now only when running as root (containers) or with `TOPIC2REEL_NO_SANDBOX=1`. |
+| 1 | Chromium ran without its sandbox. My first fix (not passing `--no-sandbox`) had **no effect**: Playwright adds it by itself unless `chromiumSandbox: true` is set. I confirmed this by reading the browser's command line. | Medium: a browser bug would run unsandboxed | **Fixed and tested.** The sandbox is requested explicitly for normal users; root (containers) and `TOPIC2REEL_NO_SANDBOX=1` run without it. `tests/sandbox_policy.js` checks the policy and, as a normal user, that the real browser has no `--no-sandbox` (verified as an unprivileged user in the build container). |
 | 2 | The render browser could in principle reach the internet | Medium | **Fixed and tested.** Layer 1: Content-Security-Policy `default-src 'none'` in `reel.html` (blocks fetch, XHR, WebSocket, images, scripts). Layer 2: a Playwright route handler aborts any non-local request. `tests/net_lockdown.js` proves both layers fire (the test counts CSP violations and aborted requests, because a machine without internet would "pass" anyway). |
 | 3 | Child processes inherited the full environment, including any API keys | Medium | **Fixed and tested.** Only an allowlist of variables (`PATH`, `HOME`, `LANG`, ...) reaches node, ffmpeg and piper. |
 | 4 | Text from the spec reaches the `piper` command line | Medium: option injection | **Verified.** The text is passed after `--` in an argument list; a test speaks the text `--help ...` instead of parsing it. |
@@ -29,11 +29,12 @@ the third-party programs the project drives (Chromium, Playwright, ffmpeg, Piper
 | 10 | Topic text could try to steer the skill ("ignore the above, run ...") or break shell quoting | Medium | **Mitigated.** `SKILL.md` says the topic is data, forbids putting it in shell commands, fixes the slug to `[a-z0-9-]`, and limits the engine lookup to the plugin folder instead of `find /`. |
 | 11 | Hostile text on screen (`<img onerror=...>`, `</script>`) | Low | **Verified.** Text is only drawn on a canvas; nothing is inserted as HTML. A test renders such text. |
 | 12 | The pronunciation lexicon is a new input file | Low | **Validated and tested.** At most 100 KB and 300 entries, string-to-string only, no control characters, applied as plain text in a single pass (never compiled as a regex), and only to the text sent to the voice. |
+| 13 | CI workflow | Low | Read-only token (`permissions: contents: read`), no secrets, no `pull_request_target`. Actions are pinned by major tag, not by commit SHA (Dependabot keeps them current; SHA pinning is a good next step). The test job opts out of the browser sandbox because GitHub's Ubuntu runners block it; a separate non-blocking job tries it. |
 
 ## Residual risks (not fixed)
 - **WebSocket is stopped only by the CSP**, not by the route handler (Playwright's `route` does not see WebSockets). The CSP is part of
   the page and cannot be changed by spec data, but it is one layer, not two.
-- **Root + `--no-sandbox`:** inside a container running as root the browser sandbox is off. The browser only opens this repository's own
+- **Root or opt-out means no browser sandbox:** inside a container running as root, or with `TOPIC2REEL_NO_SANDBOX=1`, the browser sandbox is off. The browser only opens this repository's own
   page and has no network, which limits the impact; run it as a normal user when you can.
 - **Voice models are third-party binary files.** `.onnx` files are data, but they are parsed by native code (onnxruntime). Download them
   from the official Piper voices source and check the hash. The files I used came from a third-party GitHub repository and had these
