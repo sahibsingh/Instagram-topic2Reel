@@ -96,5 +96,5 @@ tests/  scripts/  docs/ (demo page)
 ```
 
 ## Licence
-No licence file has been chosen yet; add one before publishing. Note that `piper-tts` is **GPL-3.0-or-later**. This project
+The code in this repository is released under the [MIT License](LICENSE). Note that `piper-tts` is **GPL-3.0-or-later**: this project
 only calls it as a separate program and does not bundle it. Each Piper voice has its own licence, so check it before commercial use.
