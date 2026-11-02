@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Topic2Reel: topic in, Instagram Reel out</title>
+<meta name="description" content="Type a topic and get a 9:16 Instagram Reel with animated scenes, Hindi voiceover, music and a caption. Local, free, no API key.">
+<style>
+  :root {
+    --bg: #FFF8F2; --surface: #FFFFFF; --ink: #2B1B3D; --muted: #6B5B7B; --line: #EADFF0;
+    --accent: #E5374F; --accent-2: #7C4DFF; --mark: #FFD23F; --code-bg: #2B1B3D; --code-ink: #F4EEFB;
+    --shadow: 0 18px 40px rgba(43, 27, 61, .16);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15101D; --surface: #221A2E; --ink: #F4EEFB; --muted: #B7A9C8; --line: #36294A;
+      --accent: #FF6B8B; --accent-2: #A58BFF; --code-bg: #0E0A14; --shadow: 0 18px 40px rgba(0, 0, 0, .5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #15101D; --surface: #221A2E; --ink: #F4EEFB; --muted: #B7A9C8; --line: #36294A;
+    --accent: #FF6B8B; --accent-2: #A58BFF; --code-bg: #0E0A14; --shadow: 0 18px 40px rgba(0, 0, 0, .5);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--ink); line-height: 1.55;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  .wrap { width: min(1080px, 100% - 32px); margin-inline: auto; }
+  a { color: var(--accent-2); }
+  h1, h2, h3 { line-height: 1.12; letter-spacing: -.02em; margin: 0; }
+  h2 { font-size: clamp(1.6rem, 4vw, 2.2rem); }
+  section { padding: clamp(48px, 8vw, 88px) 0; }
+  .eyebrow { font-weight: 700; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin: 0 0 10px; }
+  .lead { color: var(--muted); font-size: 1.1rem; max-width: 60ch; }
+
+  nav { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; gap: 12px; flex-wrap: wrap; }
+  .brand { font-weight: 800; letter-spacing: -.02em; font-size: 1.15rem; }
+  .brand b { color: var(--accent); }
+  nav ul { display: flex; gap: 20px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+  nav a { color: var(--ink); text-decoration: none; font-weight: 600; font-size: .95rem; }
+  nav a:hover { color: var(--accent); }
+
+  .hero { padding-top: clamp(24px, 5vw, 56px); }
+  .hero h1 { font-size: clamp(2.4rem, 7vw, 4.4rem); max-width: 14ch; }
+  .hero h1 mark { background: var(--mark); color: #2B1B3D; padding: 0 .12em; border-radius: .18em; }
+  .hero .lead { margin: 20px 0 28px; }
+  .cta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .btn { display: inline-block; padding: 13px 22px; border-radius: 999px; font-weight: 700; text-decoration: none;
+    background: var(--accent); color: #fff; border: 2px solid var(--accent); }
+  .btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+  .btn:hover { filter: brightness(1.05); }
+  .btn:focus-visible, button:focus-visible, a:focus-visible, video:focus-visible { outline: 3px solid var(--accent-2); outline-offset: 3px; }
+  .pill { display: inline-block; margin-top: 22px; font-size: .9rem; color: var(--muted); }
+
+  .phones { display: flex; gap: clamp(20px, 5vw, 56px); justify-content: center; flex-wrap: wrap; margin-top: 36px; }
+  figure.phone { margin: 0; width: min(290px, 100%); }
+  .frame { border: 9px solid #2B1B3D; border-radius: 40px; overflow: hidden; background: #000; box-shadow: var(--shadow); aspect-ratio: 9 / 16; }
+  .frame video { width: 100%; height: 100%; display: block; object-fit: cover; }
+  figure.phone figcaption { text-align: center; margin-top: 14px; font-size: .95rem; color: var(--muted); }
+  figure.phone figcaption b { color: var(--ink); display: block; font-size: 1.05rem; }
+  .note { text-align: center; color: var(--muted); font-size: .92rem; margin-top: 26px; }
+
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-top: 32px; padding: 0; list-style: none; counter-reset: s; }
+  .steps li { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 22px; counter-increment: s; }
+  .steps li::before { content: counter(s); display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
+    background: var(--accent-2); color: #fff; font-weight: 800; margin-bottom: 12px; }
+  .steps h3 { font-size: 1.15rem; margin-bottom: 6px; }
+  .steps p { margin: 0; color: var(--muted); font-size: .96rem; }
+
+  pre { background: var(--code-bg); color: var(--code-ink); border-radius: 18px; padding: 18px 20px; overflow-x: auto; font-size: .85rem;
+    line-height: 1.6; margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .code { position: relative; margin-top: 22px; }
+  .code button { position: absolute; top: 10px; right: 10px; border: 1px solid #4B3F66; background: #3A2D52; color: #F4EEFB;
+    border-radius: 10px; padding: 6px 12px; font-weight: 600; font-size: .8rem; cursor: pointer; }
+  .code button:hover { background: #4B3F66; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px; align-items: start; margin-top: 28px; }
+  .two h3 { margin-bottom: 4px; }
+
+  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 18px; margin-top: 32px; }
+  .gallery figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 10px; }
+  .gallery img { width: 100%; height: auto; display: block; border-radius: 12px; aspect-ratio: 9 / 16; object-fit: cover; background: var(--line); }
+  .gallery figcaption { padding: 10px 4px 4px; font-size: .88rem; color: var(--muted); }
+  .gallery figcaption b { color: var(--ink); display: block; font-size: .98rem; }
+
+  .limits { background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: clamp(20px, 4vw, 34px); margin-top: 28px; }
+  .limits ul { margin: 0; padding-left: 1.2em; color: var(--muted); }
+  .limits li { margin: 8px 0; }
+  .limits li b { color: var(--ink); }
+  footer { border-top: 1px solid var(--line); padding: 28px 0 48px; color: var(--muted); font-size: .92rem; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav aria-label="Main">
+    <div class="brand">Topic<b>2</b>Reel</div>
+    <ul>
+      <li><a href="#demo">Demo</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#scenes">Scenes</a></li>
+      <li><a href="#install">Install</a></li>
+      <li><a href="#limits">Limits</a></li>
+    </ul>
+  </nav>
+
+  <header class="hero">
+    <p class="eyebrow">Claude Code plugin &amp; CLI</p>
+    <h1>Type a topic. Get a <mark>Reel</mark>.</h1>
+    <p class="lead">Topic2Reel turns one line of text into a ready-to-post 9:16 Instagram Reel: animated scenes, Hindi voiceover, music and a caption with hashtags. It runs on your machine, with no API key and no upload.</p>
+    <div class="cta">
+      <a class="btn" href="#demo">Watch the demo</a>
+      <a class="btn ghost" href="#install">Install</a>
+    </div>
+    <span class="pill">Free &middot; about 2 minutes to render a 35 s reel &middot; 7 scene types</span>
+  </header>
+
+  <section id="demo" aria-labelledby="demo-h">
+    <p class="eyebrow">Demo</p>
+    <h2 id="demo-h">Two topics, same engine</h2>
+    <p class="lead">Both reels below were rendered from a short JSON spec and a Hindi Piper voice (Pratham). Press play, sound on.</p>
+    <div class="phones">
+      <figure class="phone">
+        <div class="frame"><video controls playsinline preload="metadata" poster="media/study-tips.jpg" src="media/study-tips.mp4" aria-label="Demo reel: study tips for exams"></video></div>
+        <figcaption><b>Study tips for exams</b>topic: &ldquo;Exam preparation: smart study habits&rdquo;</figcaption>
+      </figure>
+      <figure class="phone">
+        <div class="frame"><video controls playsinline preload="metadata" poster="media/fitness.jpg" src="media/fitness.mp4" aria-label="Demo reel: women's fitness truths"></video></div>
+        <figcaption><b>Women&rsquo;s fitness truths</b>topic: &ldquo;Women&rsquo;s fitness: 6 truths&rdquo;</figcaption>
+      </figure>
+    </div>
+    <p class="note">The voice is synthetic (Piper, Hindi). English loanwords can be mispronounced, so listen before you post your own reels.</p>
+  </section>
+
+  <section id="how" aria-labelledby="how-h">
+    <p class="eyebrow">How it works</p>
+    <h2 id="how-h">A topic, a spec, a video</h2>
+    <ol class="steps">
+      <li><h3>You give a topic</h3><p>&ldquo;Study tips for exams&rdquo;, for an audience you name. In Claude Code: <code>/topic2reel:reel study tips for exams</code>.</p></li>
+      <li><h3>Claude writes the spec</h3><p>Six scenes as JSON, following one prompt. A validator checks shape, length and script before anything renders.</p></li>
+      <li><h3>The engine renders</h3><p>A locked-down headless browser draws every frame, Piper speaks each line, ffmpeg mixes voice and music into one MP4 plus a caption file.</p></li>
+    </ol>
+    <div class="two" style="margin-top:30px">
+      <div>
+        <h3>One scene of a spec</h3>
+        <p class="lead" style="font-size:1rem">Scene length follows the length of the voice line, so you never retime anything by hand.</p>
+      </div>
+      <div class="code">
+<pre><code>{
+  "type": "hook",
+  "headline": ["Raat bhar ratta", "mat maaro!"],
+  "highlight": ["ratta", "mat"],
+  "emoji": "📚", "stamp": "no",
+  "badge": "Ratta system",
+  "voice": "परीक्षा से पहले पूरी रात जागकर रटना बंद करो।"
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section id="scenes" aria-labelledby="sc-h">
+    <p class="eyebrow">Scene types</p>
+    <h2 id="sc-h">Seven building blocks</h2>
+    <p class="lead">Visuals are emoji and shapes drawn in code, so they fit any topic. Stills below are real frames from the demo reels.</p>
+    <div class="gallery">
+      <figure><img loading="lazy" src="media/scenes/hook.jpg" alt="Hook scene: a book emoji with a red cross and the badge Ratta system"><figcaption><b>hook</b>Stop the scroll</figcaption></figure>
+      <figure><img loading="lazy" src="media/scenes/cards.jpg" alt="Cards scene: five food cards labelled Dal, Paneer, Eggs, Curd and Sprouts"><figcaption><b>cards</b>Icon grid</figcaption></figure>
+      <figure><img loading="lazy" src="media/scenes/myth_fact.jpg" alt="Myth and fact scene with a green fact bubble"><figcaption><b>myth_fact</b>Myth flips to fact</figcaption></figure>
+      <figure><img loading="lazy" src="media/scenes/stat.jpg" alt="Stat scene with the big number 25 and a label"><figcaption><b>stat</b>One big number</figcaption></figure>
+      <figure><img loading="lazy" src="media/scenes/steps.jpg" alt="Steps scene with three ticked items"><figcaption><b>steps</b>Checklist</figcaption></figure>
+      <figure><img loading="lazy" src="media/scenes/compare.jpg" alt="Compare scene: the wrong way above, the better way below"><figcaption><b>compare</b>Wrong vs better</figcaption></figure>
+      <figure><img loading="lazy" src="media/scenes/cta.jpg" alt="Call to action scene with a pin emoji and Save and Share buttons"><figcaption><b>cta</b>Save and share</figcaption></figure>
+    </div>
+  </section>
+
+  <section id="install" aria-labelledby="in-h">
+    <p class="eyebrow">Install</p>
+    <h2 id="in-h">Plugin or command line</h2>
+    <div class="two">
+      <div>
+        <h3>As a Claude Code plugin</h3>
+        <div class="code"><pre><code>/plugin marketplace add sahibsingh/Instagram-topic2Reel
+/plugin install topic2reel@topic2reel
+/topic2reel:reel study tips for exams</code></pre></div>
+        <p class="lead" style="font-size:.92rem;margin-top:10px">Written from Claude Code&rsquo;s plugin docs; not yet tried against this repository. Local test: <code>claude --plugin-dir ./Instagram-topic2Reel</code>.</p>
+      </div>
+      <div>
+        <h3>From the command line</h3>
+        <div class="code"><pre><code>pip install -r requirements.txt
+npm ci &amp;&amp; npx playwright install chromium
+scripts/get_voice.sh hi_IN-pratham-medium
+python3 engine/topic2reel.py --doctor
+python3 engine/topic2reel.py examples/study_tips.json \
+  -o out/study.mp4 --voice piper \
+  --piper-model "$TOPIC2REEL_PIPER_MODEL"</code></pre></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="limits" aria-labelledby="li-h">
+    <p class="eyebrow">Honest limits</p>
+    <h2 id="li-h">What to know before you post</h2>
+    <div class="limits">
+      <ul>
+        <li><b>On-screen text is Roman script</b> (Hinglish). Devanagari is used only for the spoken line.</li>
+        <li><b>Facts come from the LLM.</b> Read health, money and legal topics before posting.</li>
+        <li><b>Voice quality depends on the Piper voice.</b> English words can be mispronounced; re-spell them in Devanagari.</li>
+        <li><b>Private by design:</b> the render browser has no network access (tested), the tool needs no API key, and child processes do not inherit your secrets.</li>
+        <li><b>Licences:</b> <code>piper-tts</code> is GPL-3.0-or-later and each voice has its own licence. See SECURITY.md in the repository for the full review.</li>
+      </ul>
+    </div>
+  </section>
+</div>
+<footer><div class="wrap">Topic2Reel 0.1.0. Source, README and SECURITY.md: <a href="https://github.com/sahibsingh/Instagram-topic2Reel">github.com/sahibsingh/Instagram-topic2Reel</a>.</div></footer>
+<script>
+  document.querySelectorAll('.code').forEach(function (box) {
+    var pre = box.querySelector('pre'); if (!pre) return;
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = 'Copy'; b.setAttribute('aria-label', 'Copy code');
+    b.addEventListener('click', function () {
+      var text = pre.innerText;
+      var ok = function () { b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy'; }, 1500); };
+      try { navigator.clipboard.writeText(text).then(ok, function () {}); } catch (e) {}
+    });
+    box.appendChild(b);
+  });
+</script>
+</body>
+</html>

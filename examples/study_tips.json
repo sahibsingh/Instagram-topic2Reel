@@ -1,0 +1,58 @@
+{
+  "topic": "Exam preparation: smart study habits",
+  "caption": "Exam se pehle raat bhar jaagna band karo 📚\nYe simple baatein try karo aur dekho farak 💡\n\nTumhara study trick kya hai? Comment mein batao 👇\nSave karo, exam se pehle kaam aayega! 📌",
+  "hashtags": ["#studytips", "#examprep", "#studentlife", "#studymotivation", "#boardexams", "#studysmart", "#reelsindia"],
+  "scenes": [
+    {
+      "type": "hook",
+      "headline": ["Raat bhar ratta", "mat maaro!"],
+      "highlight": ["ratta", "mat"],
+      "emoji": "📚", "stamp": "no", "badge": "Ratta system",
+      "voice": "परीक्षा से पहले पूरी रात जागकर रटना बंद करो।"
+    },
+    {
+      "type": "compare",
+      "headline": ["Ratta vs", "Samajh"],
+      "highlight": ["Samajh"],
+      "left": {"emoji": "🤯", "label": "Ratta: ek raat mein sab"},
+      "right": {"emoji": "🧠", "label": "Samajh: roz thoda thoda"},
+      "voice": "रटने से चीज़ें जल्दी भूलती हैं। रोज़ थोड़ा समझकर पढ़ने से याद रहता है।"
+    },
+    {
+      "type": "stat",
+      "headline": ["Pomodoro", "trick"],
+      "highlight": ["trick"],
+      "emoji": "⏱️", "value": "25",
+      "label": "minute focus, phir 5 minute ka break",
+      "sub": "4 round ke baad lamba break",
+      "voice": "पच्चीस मिनट पूरे ध्यान से पढ़ो, फिर पाँच मिनट का ब्रेक लो।"
+    },
+    {
+      "type": "steps",
+      "headline": ["Padhne ka", "simple plan"],
+      "highlight": ["simple"],
+      "items": [
+        {"emoji": "🧗", "text": "Pehle sabse mushkil topic"},
+        {"emoji": "📝", "text": "Phir apne notes banao"},
+        {"emoji": "🔁", "text": "Aakhir mein revise karo"}
+      ],
+      "voice": "पहले सबसे मुश्किल टॉपिक पढ़ो, फिर अपने नोट्स बनाओ, और आखिर में रिवाइज़ करो।"
+    },
+    {
+      "type": "myth_fact",
+      "headline": ["Neend bhi", "padhai hai"],
+      "highlight": ["padhai"],
+      "emoji": "😴",
+      "myth": "Raat bhar jaagoge toh zyada yaad hoga",
+      "fact": "Neend se din ki padhai dimaag mein baithti hai",
+      "voice": "नींद भी पढ़ाई का हिस्सा है। अच्छी नींद से दिन की पढ़ाई दिमाग में बैठती है।"
+    },
+    {
+      "type": "cta",
+      "headline": ["Save karo", "exam se pehle"],
+      "highlight": ["Save"],
+      "emoji": "📌", "primary": "Save karo", "secondary": "Dost ko bhejo",
+      "voice": "ये वीडियो सेव कर लो, और अपने दोस्त को भी भेजो जिसके एग्ज़ाम आने वाले हैं।"
+    }
+  ]
+}

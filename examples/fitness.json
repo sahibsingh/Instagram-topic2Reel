@@ -1,0 +1,62 @@
+{
+  "topic": "Women's fitness: 6 truths",
+  "caption": "Fit hona matlab bhooka rehna nahi hota 🙅‍♀️\nYe 6 baatein yaad rakho aur apni fitness journey ko easy banao 💪✨\n\nKaunsi tip tumne pehle se follow ki hai? Comment mein batao 👇\nSave karo ya kisi dost ko bhejo jise ye zaroor padhna chahiye! ❤️",
+  "hashtags": ["#womenfitness", "#fitnesstipsforwomen", "#weightlossjourney", "#indianfitness", "#healthylifestyle", "#strengthtraining", "#fitgirl", "#reelsindia", "#fitnessmotivation"],
+  "scenes": [
+    {
+      "type": "hook",
+      "headline": ["Bhooka rehna", "band karo!"],
+      "highlight": ["band", "karo!"],
+      "emoji": "🥗", "stamp": "no", "badge": "Crash diet",
+      "caption": "Khana kam nahi, sahi khao",
+      "voice": "अगर तुम फिट होने के लिए भूखी रहती हो, तो रुको! वेट लॉस के लिए भूखा रहना बंद करो।"
+    },
+    {
+      "type": "cards",
+      "headline": ["Har meal mein", "protein!"],
+      "highlight": ["protein!"],
+      "items": [
+        {"emoji": "🍲", "label": "Dal"}, {"emoji": "🧀", "label": "Paneer"}, {"emoji": "🥚", "label": "Eggs"},
+        {"emoji": "🥛", "label": "Curd"}, {"emoji": "🌱", "label": "Sprouts"}
+      ],
+      "caption": "Har plate mein thoda protein",
+      "voice": "हर मील में प्रोटीन ज़रूर लो। दाल, पनीर, अंडे, दही और स्प्राउट्स।"
+    },
+    {
+      "type": "myth_fact",
+      "headline": ["Weights se bulky", "nahi hoti!"],
+      "highlight": ["nahi", "hoti!"],
+      "emoji": "🏋️‍♀️",
+      "myth": "Weights uthaungi toh bulky ho jaungi",
+      "fact": "Strength training se body tone aur shape hoti hai",
+      "voice": "वेट उठाने से बॉडी बल्की नहीं होती। स्ट्रेंथ ट्रेनिंग से शेप और टोन आता है।"
+    },
+    {
+      "type": "stat",
+      "headline": ["Paani + Neend", "= Glow"],
+      "highlight": ["Glow"],
+      "emoji": "💧", "value": "2.5–3L",
+      "label": "paani roz, aur 7–8 ghante neend",
+      "sub": "Yehi hai asli glow ✨",
+      "voice": "रोज़ ढाई से तीन लीटर पानी पियो, और सात से आठ घंटे की नींद लो। यही है असली ग्लो।"
+    },
+    {
+      "type": "steps",
+      "headline": ["Cycle ke hisaab se", "workout karo"],
+      "highlight": ["workout"],
+      "items": [
+        {"emoji": "🧘‍♀️", "text": "Period mein: Walk ya Yoga"},
+        {"emoji": "🏋️‍♀️", "text": "Baaki din: Strength"},
+        {"emoji": "💗", "text": "Body ki suno"}
+      ],
+      "voice": "पीरियड्स में वॉक या योगा करो, बाकी दिनों में स्ट्रेंथ। अपनी बॉडी की सुनो।"
+    },
+    {
+      "type": "cta",
+      "headline": ["Consistency", "> Perfection"],
+      "highlight": ["Consistency"],
+      "emoji": "❤️", "primary": "Save karo", "secondary": "Friend ko bhejo",
+      "voice": "परफेक्शन नहीं, कंसिस्टेंसी ज़रूरी है। रोज़ थोड़ा करो। सेव करो, और अपनी फ्रेंड को भेजो।"
+    }
+  ]
+}

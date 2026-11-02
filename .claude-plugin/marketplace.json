@@ -1,0 +1,13 @@
+{
+  "name": "topic2reel",
+  "owner": {
+    "name": "sahibsingh"
+  },
+  "plugins": [
+    {
+      "name": "topic2reel",
+      "source": "./",
+      "description": "Topic to Instagram Reel: animated scenes, Hindi voiceover, music and caption. Local, no API key."
+    }
+  ]
+}

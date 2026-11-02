@@ -1,0 +1,9 @@
+{
+  "name": "topic2reel",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Topic to Instagram Reel: animated scenes, Hindi voiceover, music and caption.",
+  "engines": { "node": ">=18" },
+  "dependencies": { "playwright": "~1.63.0" },
+  "scripts": { "test": "python3 -m unittest discover -s tests -v", "doctor": "python3 engine/topic2reel.py --doctor" }
+}
