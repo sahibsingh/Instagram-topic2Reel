@@ -12,3 +12,5 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+    # raise a range's lower bound only when needed, so users with older compatible versions are not locked out
+    versioning-strategy: increase-if-necessary
