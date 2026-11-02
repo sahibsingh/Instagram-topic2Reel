@@ -92,6 +92,23 @@ def apply_lexicon(text: str, lexicon: dict[str, str] | None) -> str:
     return rx.sub(lambda m: lexicon[m.group(1)], text)
 
 
+VOICE_NAME_RX = re.compile(r"^[a-z0-9_]{2,30}$")
+
+
+def resolve_voice_model(name: str, piper_model: str | None) -> str:
+    """hi_IN-<name>-medium.onnx in the folder of the configured model (or TOPIC2REEL_VOICES_DIR)."""
+    if not VOICE_NAME_RX.match(name):
+        raise SpecError("--voice-name must be lowercase letters, digits or _ (for example pratham)")
+    folder = os.environ.get("TOPIC2REEL_VOICES_DIR") or (str(Path(piper_model).expanduser().resolve().parent) if piper_model else "")
+    if not folder:
+        raise SpecError("--voice-name needs TOPIC2REEL_PIPER_MODEL or TOPIC2REEL_VOICES_DIR to know where the voices are")
+    for quality in ("medium", "low", "high", "x_low"):
+        cand = Path(folder).expanduser().resolve() / f"hi_IN-{name}-{quality}.onnx"
+        if cand.is_file():
+            return str(cand)
+    raise SpecError(f"voice '{name}' not found in {folder} (looked for hi_IN-{name}-<quality>.onnx)")
+
+
 def show_phonemes(text: str, piper_model: str, lexicon: dict[str, str] | None = None) -> str:
     """What Piper will actually say, as phonemes. Lets you check a pronunciation without listening."""
     from piper import PiperVoice
@@ -128,7 +145,11 @@ def validate_spec(spec: object) -> list[str]:
             errs.append(f"{p}.headline: list of 1-2 short lines")
         else:
             for k, line in enumerate(hl): _text(f"{p}.headline[{k}]", line, errs, 24)
-        for k, w in enumerate(sc.get("highlight") or []): _text(f"{p}.highlight[{k}]", w, errs, 24)
+        hlv = sc.get("highlight")
+        if hlv is not None and not (isinstance(hlv, list) and len(hlv) <= 4):
+            errs.append(f"{p}.highlight: a list of at most 4 words from the headline (not a single string)")
+        else:
+            for k, w in enumerate(hlv or []): _text(f"{p}.highlight[{k}]", w, errs, 24)
         if sc.get("caption") is not None: _text(f"{p}.caption", sc["caption"], errs, 48)
         _text(f"{p}.voice", sc.get("voice"), errs, 400, screen=False)
         if t == "hook":
@@ -143,7 +164,7 @@ def validate_spec(spec: object) -> list[str]:
                     if not isinstance(it, dict) or not _emoji_ok(it.get("emoji")): errs.append(f"{p}.items[{k}].emoji: one emoji required")
                     else: _text(f"{p}.items[{k}].label", it.get("label"), errs, 18)
                 hi = sc.get("highlight_index")
-                if hi is not None and not (isinstance(hi, int) and 0 <= hi < len(items)): errs.append(f"{p}.highlight_index out of range")
+                if hi is not None and not (isinstance(hi, int) and not isinstance(hi, bool) and 0 <= hi < len(items)): errs.append(f"{p}.highlight_index out of range")
         elif t == "myth_fact":
             if not _emoji_ok(sc.get("emoji")): errs.append(f"{p}.emoji: one emoji required")
             _text(f"{p}.myth", sc.get("myth"), errs, 90); _text(f"{p}.fact", sc.get("fact"), errs, 90)
@@ -297,7 +318,7 @@ def generate(spec_path: str | Path, out_path: str | Path, voice: str = "none", p
 
 
 def preview(spec_path: str | Path, out_dir: str | Path) -> list[Path]:
-    spec_path = Path(spec_path).resolve()
+    spec_path, out_dir = Path(spec_path).resolve(), Path(out_dir).resolve()   # node runs in render/, so a relative dir would land there
     spec = load_spec(spec_path)
     errs = validate_spec(spec)
     if errs:
@@ -342,6 +363,7 @@ def main() -> int:
     ap.add_argument("--validate", action="store_true"); ap.add_argument("--preview", metavar="DIR")
     ap.add_argument("--voice", choices=["piper", "dir", "none"], default=os.environ.get("TOPIC2REEL_VOICE", "none"))
     ap.add_argument("--piper-model", default=os.environ.get("TOPIC2REEL_PIPER_MODEL"))
+    ap.add_argument("--voice-name", metavar="NAME", help="pick hi_IN-NAME-medium.onnx from the same folder as the configured model")
     ap.add_argument("--voice-dir", default=os.environ.get("TOPIC2REEL_VOICE_DIR"))
     ap.add_argument("--no-music", action="store_true")
     ap.add_argument("--lexicon", default=os.environ.get("TOPIC2REEL_LEXICON"), help="JSON file of respellings applied to the voice text only")
@@ -349,6 +371,11 @@ def main() -> int:
     a = ap.parse_args()
     if a.doctor:
         return doctor(a.piper_model)
+    if a.voice_name:
+        try:
+            a.piper_model = resolve_voice_model(a.voice_name, a.piper_model)
+        except SpecError as e:
+            print(f"error: {e}", file=sys.stderr); return 1
     if a.phonemes is not None:
         try:
             print(show_phonemes(a.phonemes, a.piper_model or "", load_lexicon(a.lexicon) if a.lexicon else None)); return 0
@@ -362,7 +389,9 @@ def main() -> int:
             print("OK" if not errs else "INVALID:\n  " + "\n  ".join(errs)); return 1 if errs else 0
         if a.preview:
             print("\n".join(map(str, preview(a.spec, a.preview)))); return 0
-        print("done:", generate(a.spec, a.out, a.voice, a.piper_model, a.voice_dir, not a.no_music, a.lexicon)); return 0
+        out = generate(a.spec, a.out, a.voice, a.piper_model, a.voice_dir, not a.no_music, a.lexicon)
+        print(f"done: {out} ({_duration(out):.1f} s, voice: {a.voice})")
+        print(f"caption: {out.with_suffix('.caption.txt')}"); return 0
     except (SpecError, subprocess.CalledProcessError, subprocess.TimeoutExpired, json.JSONDecodeError, OSError) as e:
         print(f"error: {e}", file=sys.stderr); return 1
 

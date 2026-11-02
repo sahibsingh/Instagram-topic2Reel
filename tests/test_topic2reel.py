@@ -48,6 +48,8 @@ class Validation(unittest.TestCase):
             "ascii instead of emoji": mut(lambda s: s["scenes"][0].__setitem__("emoji", "abc")),
             "bad stamp": mut(lambda s: s["scenes"][0].__setitem__("stamp", "maybe")),
             "scene not an object": mut(lambda s: s["scenes"].__setitem__(0, "x")),
+            "highlight is a bare string": mut(lambda s: s["scenes"][0].__setitem__("highlight", "ratta")),
+            "highlight_index is a bool": mut(lambda s: (s["scenes"].__setitem__(1, {"type": "cards", "headline": ["a"], "voice": "नमस्ते दोस्तों", "items": [{"emoji": "🥚", "label": "Egg"}, {"emoji": "🥛", "label": "Milk"}], "highlight_index": True}))),
             "voice text too long in total": mut(lambda s: (s.__setitem__("scenes", (s["scenes"] + s["scenes"])[:8]),
                                                            [sc.__setitem__("voice", "अ" * 399) for sc in s["scenes"]])),
         }
@@ -120,6 +122,18 @@ class Browser(unittest.TestCase):
         res = json.loads(r.stdout.strip().splitlines()[-1])
         self.assertEqual(res["policy"], {"user": True, "root": False, "optOut": False})
 
+    def test_relative_preview_dir_lands_next_to_the_caller_not_in_the_renderer(self):
+        with tempfile.TemporaryDirectory() as td:
+            spec = Path(td, "spec.json"); spec.write_text(json.dumps(good_spec()), encoding="utf-8")
+            old = Path.cwd(); os.chdir(td)
+            try:
+                shots = t2r.preview("spec.json", "prev")
+            finally:
+                os.chdir(old)
+            self.assertEqual(len(shots), 6)
+            self.assertTrue(all(Path(s).resolve().is_relative_to(Path(td).resolve() / "prev") for s in shots))
+            self.assertFalse((ROOT / "engine" / "render" / "prev").exists())
+
     def test_hostile_text_is_only_drawn_never_executed(self):
         spec = good_spec()
         spec["scenes"][0]["headline"] = ["<img src=x onerror=1>", "'\";alert(1);//"]
@@ -131,6 +145,18 @@ class Browser(unittest.TestCase):
             self.assertEqual(len(shots), len(spec["scenes"]))
 
 
+@unittest.skipUnless(shutil.which("node"), "needs node")
+class PromptBuilder(unittest.TestCase):
+    def test_builder_logic_and_skill_agree(self):
+        r = subprocess.run(["node", str(ROOT / "tests" / "builder_logic.js")], capture_output=True, text=True, cwd=ROOT, timeout=60)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+
+    @unittest.skipUnless(HAS_NODE, "needs playwright")
+    def test_builder_page_in_a_real_browser(self):
+        r = subprocess.run(["node", str(ROOT / "tests" / "builder_dom.js")], capture_output=True, text=True, cwd=ROOT, timeout=240)
+        self.assertEqual(r.returncode, 0, r.stdout[-1500:] + r.stderr[-1500:])
+
+
 @unittest.skipUnless(PIPER_MODEL and Path(PIPER_MODEL).is_file(), "needs TOPIC2REEL_PIPER_MODEL")
 class Voice(unittest.TestCase):
     def test_text_that_looks_like_an_option_is_spoken_not_parsed(self):
@@ -140,6 +166,18 @@ class Voice(unittest.TestCase):
             files = t2r.synth_voice(spec, "piper", Path(td), PIPER_MODEL, None)
             with wave.open(str(files[0])) as w:
                 self.assertGreater(w.getnframes() / w.getframerate(), 0.5)
+
+
+class VoiceName(unittest.TestCase):
+    def test_resolves_a_sibling_voice_and_rejects_bad_names(self):
+        with tempfile.TemporaryDirectory() as td:
+            for n in ("pratham", "priyamvada"): Path(td, f"hi_IN-{n}-medium.onnx").write_bytes(b"x")
+            base = str(Path(td, "hi_IN-pratham-medium.onnx"))
+            self.assertTrue(t2r.resolve_voice_model("priyamvada", base).endswith("hi_IN-priyamvada-medium.onnx"))
+            for bad in ("../x", "Pratham", "a b", "p;rm", "", "x" * 40):
+                with self.subTest(bad), self.assertRaises(t2r.SpecError): t2r.resolve_voice_model(bad, base)
+            with self.assertRaises(t2r.SpecError): t2r.resolve_voice_model("rohan", base)   # not installed
+            with self.assertRaises(t2r.SpecError): t2r.resolve_voice_model("rohan", None)   # nowhere to look
 
 
 class Lexicon(unittest.TestCase):

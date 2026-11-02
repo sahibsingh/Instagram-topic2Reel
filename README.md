@@ -32,6 +32,13 @@ topic ──► spec.json (written by Claude, or any LLM, from prompts/topic_to_
 
 Claude then runs the workflow in `skills/reel/SKILL.md`: check the machine, write the spec, validate, preview, render, report.
 
+## Prompt builder and templates
+The demo page (`docs/index.html`) has a **prompt builder**: pick a topic, length, tone, scene types, hook, call to action and voice, and the
+prompt updates live. Two tabs: the slash-command form for Claude Code with the plugin, and a longer form for Claude in the cloud (it also
+works without the plugin and has an **Open in Claude** button). Twelve **templates** (fitness, study, money, safety, career, ...) fill the
+form for you. The builder writes a short `KEY: value` brief that `skills/reel/SKILL.md` understands (`TOPIC`, `AUDIENCE`, `TONE`, `LENGTH`,
+`SCENES`, `HOOK`, `CTA`, `VOICE`, `PRONUNCIATION`, `PREVIEW`, `SETUP`, `FACTS`, `AVOID`). A test keeps the two in sync.
+
 ## Use it from the command line
 ```bash
 python3 engine/topic2reel.py --doctor                                         # what is missing on this machine?
@@ -95,7 +102,7 @@ Hindi words such as फल keep `pʰ`. It is **off by default**; the phonemes we
 
 ## Tests
 ```bash
-python3 -m unittest discover -s tests -v    # 18 tests; the browser and voice ones skip if Node/Piper are missing
+python3 -m unittest discover -s tests -v    # 22 tests; the browser and voice ones skip if Node/Piper are missing
 ```
 
 ## Layout

@@ -102,7 +102,7 @@ function progress(i, u, n) {
   }
 }
 function headline(lines, t, hlList, mcol) {
-  const hs = new Set((hlList || []).map(norm).filter(Boolean));
+  const hs = new Set((Array.isArray(hlList) ? hlList : []).map(w => norm(String(w))).filter(Boolean));
   ctx.save(); ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
   let size = 104; font(size, 800);
   const maxW = Math.max(...lines.map(l => ctx.measureText(l).width));

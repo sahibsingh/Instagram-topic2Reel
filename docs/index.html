@@ -22,6 +22,7 @@
     --accent: #FF6B8B; --accent-2: #A58BFF; --code-bg: #0E0A14; --shadow: 0 18px 40px rgba(0, 0, 0, .5);
   }
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }   /* component display rules (.btn etc.) must not override the hidden attribute */
   html { scroll-behavior: smooth; }
   body { margin: 0; background: var(--bg); color: var(--ink); line-height: 1.55;
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
@@ -87,6 +88,55 @@
   .limits li { margin: 8px 0; }
   .limits li b { color: var(--ink); }
   footer { border-top: 1px solid var(--line); padding: 28px 0 48px; color: var(--muted); font-size: .92rem; }
+
+  /* ---- prompt builder + templates ---- */
+  .builder { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; margin-top: 30px; align-items: start; }
+  @media (max-width: 880px) { .builder { grid-template-columns: minmax(0, 1fr); } }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: clamp(16px, 3vw, 26px); }
+  .controls .field, .controls fieldset { margin: 0 0 18px; padding: 0; border: 0; min-width: 0; }
+  .controls label.top, .controls legend { display: block; font-weight: 700; font-size: .95rem; margin-bottom: 8px; padding: 0; }
+  .opt { color: var(--muted); font-weight: 500; font-size: .85rem; }
+  .controls input[type="text"], .controls select, .controls textarea { width: 100%; font: inherit; color: var(--ink); background: var(--bg);
+    border: 2px solid var(--line); border-radius: 14px; padding: 11px 14px; }
+  .controls textarea { min-height: 84px; resize: vertical; }
+  .controls input[type="text"]:focus-visible, .controls select:focus-visible, .controls textarea:focus-visible { outline: 3px solid var(--accent-2); outline-offset: 2px; }
+  .err { color: var(--accent); font-size: .88rem; margin: 6px 0 0; }
+  .seg, .checks { display: flex; flex-wrap: wrap; gap: 8px; }
+  .seg input, .checks input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg label, .checks label { display: inline-flex; flex-direction: column; border: 2px solid var(--line); border-radius: 14px; padding: 8px 14px; cursor: pointer;
+    background: var(--bg); font-weight: 600; font-size: .92rem; line-height: 1.25; }
+  .seg label small, .checks label small { color: var(--muted); font-weight: 500; font-size: .76rem; }
+  .seg input:checked + label, .checks input:checked + label { border-color: var(--accent-2); background: color-mix(in srgb, var(--accent-2) 14%, var(--bg)); }
+  .seg input:focus-visible + label, .checks input:focus-visible + label { outline: 3px solid var(--accent-2); outline-offset: 2px; }
+  .switch { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 10px; font-size: .92rem; }
+  .switch input { margin-top: 3px; width: 18px; height: 18px; accent-color: var(--accent-2); }
+  .switch small { display: block; color: var(--muted); }
+  details.adv { margin: 4px 0 14px; }
+  details.adv summary { cursor: pointer; font-weight: 700; margin-bottom: 10px; }
+  .out { position: sticky; top: 14px; }
+  @media (max-width: 880px) { .out { position: static; } }
+  .tabs { display: flex; gap: 6px; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 4px; margin-bottom: 12px; }
+  .tabs button { flex: 1; border: 0; border-radius: 999px; padding: 9px 12px; font: inherit; font-weight: 700; font-size: .9rem; cursor: pointer; background: transparent; color: var(--muted); }
+  .tabs button[aria-selected="true"] { background: var(--accent-2); color: #fff; }
+  #o-hint { color: var(--muted); font-size: .9rem; margin: 0 0 10px; }
+  #o-prompt { white-space: pre-wrap; word-break: break-word; max-height: 420px; overflow: auto; font-size: .82rem; }
+  .notes { margin: 12px 0 0; padding-left: 1.2em; color: var(--muted); font-size: .88rem; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+  .actions .btn[disabled], .actions .btn[aria-disabled="true"] { opacity: .45; pointer-events: none; }
+  button.btn { font: inherit; font-weight: 700; cursor: pointer; }
+  .btn.small { padding: 9px 16px; font-size: .9rem; }
+  .meta { color: var(--muted); font-size: .82rem; margin: 10px 0 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+  .chipbtn { border: 2px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 7px 16px; font: inherit; font-weight: 600; font-size: .9rem; cursor: pointer; }
+  .chipbtn[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .tgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; margin-top: 18px; }
+  .tcard { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 8px; }
+  .tcard h3 { font-size: 1.1rem; }
+  .tcard p { margin: 0; color: var(--muted); font-size: .92rem; }
+  .cat { align-self: flex-start; font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent-2); }
+  .tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tag { font-size: .72rem; font-weight: 600; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 2px 9px; color: var(--muted); }
+  .tact { display: flex; gap: 8px; margin-top: auto; padding-top: 8px; flex-wrap: wrap; }
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 </style>
 </head>
@@ -96,6 +146,8 @@
     <div class="brand">Topic<b>2</b>Reel</div>
     <ul>
       <li><a href="#demo">Demo</a></li>
+      <li><a href="#builder">Prompt builder</a></li>
+      <li><a href="#templates">Templates</a></li>
       <li><a href="#how">How it works</a></li>
       <li><a href="#scenes">Scenes</a></li>
       <li><a href="#install">Install</a></li>
@@ -109,6 +161,7 @@
     <p class="lead">Topic2Reel turns one line of text into a ready-to-post 9:16 Instagram Reel: animated scenes, Hindi voiceover, music and a caption with hashtags. It runs on your machine, with no API key and no upload.</p>
     <div class="cta">
       <a class="btn" href="#demo">Watch the demo</a>
+      <a class="btn ghost" href="#builder">Build a prompt</a>
       <a class="btn ghost" href="#install">Install</a>
     </div>
     <span class="pill">Free &middot; about 2 minutes to render a 35 s reel &middot; 7 scene types</span>
@@ -129,6 +182,58 @@
       </figure>
     </div>
     <p class="note">The voice is synthetic (Piper, Hindi). English loanwords can be mispronounced, so listen before you post your own reels.</p>
+  </section>
+
+  <section id="builder" aria-labelledby="bd-h">
+    <p class="eyebrow">Prompt builder</p>
+    <h2 id="bd-h">Set the options, get the prompt</h2>
+    <p class="lead">Choose a topic and a few options. The prompt updates as you go. Paste it into Claude Code (with the plugin), or open it in Claude in the cloud, and the reel gets made.</p>
+    <div class="builder">
+      <form class="panel controls" id="bform" autocomplete="off">
+        <div class="field"><label class="top" for="f-topic">1. Topic</label>
+          <input id="f-topic" type="text" maxlength="120" placeholder="e.g. Study tips for board exams" aria-describedby="e-topic">
+          <p class="err" id="e-topic" role="alert">Write a topic (at least 3 characters).</p></div>
+        <div class="field"><label class="top" for="f-audience">2. Audience <span class="opt">optional</span></label>
+          <input id="f-audience" type="text" maxlength="80" placeholder="e.g. Class 10 and 12 students in India"></div>
+        <fieldset><legend>3. Length</legend><div class="seg" id="g-length"></div></fieldset>
+        <fieldset><legend>4. Tone</legend><div class="seg" id="g-tone"></div></fieldset>
+        <fieldset><legend>5. Middle scenes <span class="opt">hook first and call to action last are always added</span></legend>
+          <div class="checks" id="g-scenes"></div><p class="err" id="e-scenes" role="alert" hidden>Pick at least one scene type.</p></fieldset>
+        <fieldset><legend>6. Hook</legend><div class="seg" id="g-hook"></div></fieldset>
+        <fieldset><legend>7. Call to action</legend><div class="seg" id="g-cta"></div></fieldset>
+        <div class="field"><label class="top" for="f-voice">8. Voice</label><select id="f-voice"></select></div>
+        <label class="switch"><input type="checkbox" id="f-lexicon"><span>Pronunciation fixes for English words<small>Gives the f sound to words like fit and friend</small></span></label>
+        <label class="switch"><input type="checkbox" id="f-preview" checked><span>Look at preview frames before the final render</span></label>
+        <label class="switch"><input type="checkbox" id="f-install" checked><span>Let Claude install missing tools<small>A fresh cloud session needs this. Claude tells you what it installed.</small></span></label>
+        <details class="adv"><summary>Facts and things to avoid <span class="opt">optional</span></summary>
+          <div class="field"><label class="top" for="f-facts">Use only these facts <span class="opt">one per line</span></label><textarea id="f-facts" maxlength="1200"></textarea></div>
+          <div class="field"><label class="top" for="f-avoid">Avoid <span class="opt">one per line</span></label><textarea id="f-avoid" maxlength="800"></textarea></div></details>
+        <button type="button" class="btn ghost small" id="b-reset">Reset</button>
+      </form>
+      <div class="panel out">
+        <div class="tabs" role="tablist" aria-label="Prompt type">
+          <button type="button" role="tab" data-tab="plugin" aria-selected="true">Claude Code plugin</button>
+          <button type="button" role="tab" data-tab="cloud" aria-selected="false">Claude (cloud)</button>
+        </div>
+        <p id="o-hint"></p>
+        <pre id="o-prompt" tabindex="0" aria-live="polite" aria-label="Generated prompt"></pre>
+        <ul class="notes" id="o-notes"></ul>
+        <div class="actions">
+          <button type="button" class="btn" id="b-copy">Copy prompt</button>
+          <a class="btn ghost" id="a-open" href="#builder" target="_blank" rel="noopener noreferrer" hidden>Open in Claude</a>
+          <button type="button" class="btn ghost" id="b-share">Copy share link</button>
+        </div>
+        <p class="meta" id="o-meta"></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="templates" aria-labelledby="tp-h">
+    <p class="eyebrow">Templates</p>
+    <h2 id="tp-h">Start from a ready topic</h2>
+    <p class="lead">Every template uses the plugin's own scene types. Press <b>Use in builder</b> to tweak it, or copy the prompt as it is (it follows the tab you chose above).</p>
+    <div class="chips" id="t-filter" role="group" aria-label="Filter templates"></div>
+    <div class="tgrid" id="t-grid"></div>
   </section>
 
   <section id="how" aria-labelledby="how-h">
@@ -211,6 +316,8 @@ python3 engine/topic2reel.py examples/study_tips.json \
   </section>
 </div>
 <footer><div class="wrap">Topic2Reel 0.1.0. Source, README and SECURITY.md: <a href="https://github.com/sahibsingh/Instagram-topic2Reel">github.com/sahibsingh/Instagram-topic2Reel</a>.</div></footer>
+<script src="builder.js"></script>
+<script src="app.js"></script>
 <script>
   document.querySelectorAll('.code').forEach(function (box) {
     var pre = box.querySelector('pre'); if (!pre) return;
