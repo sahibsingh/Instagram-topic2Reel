@@ -81,9 +81,21 @@ A scene lasts as long as its voice line plus about one second; without voice it 
 - The facts come from the LLM that writes the spec. Read health, money and legal topics before posting.
 - The music is a small synthesized beat. Swap in a trending audio when you upload.
 
+## Pronunciation
+English loanwords can come out wrong. Two tools help, and neither needs you to listen first:
+```bash
+# what will Piper actually say? (phonemes)
+python3 engine/topic2reel.py --phonemes "अपनी फ्रेंड को भेजो" --piper-model "$TOPIC2REEL_PIPER_MODEL"
+# respell words for the voice only (the on-screen text is not touched)
+python3 engine/topic2reel.py spec.json -o out/x.mp4 --voice piper --lexicon examples/lexicon/hinglish.json
+```
+A lexicon is a JSON object `{"written": "respelling"}`; whole words only, one pass, plain text (never a regex).
+`examples/lexicon/hinglish.json` gives English `f` to words like फ़िट and फ़्रेंड (Piper says `pʰ` for a plain फ, `f` for फ़) while
+Hindi words such as फल keep `pʰ`. It is **off by default**; the phonemes were checked, the resulting sound was not listened to.
+
 ## Tests
 ```bash
-python3 -m unittest discover -s tests -v    # 10 tests; the browser and voice ones skip if Node/Piper are missing
+python3 -m unittest discover -s tests -v    # 17 tests; the browser and voice ones skip if Node/Piper are missing
 ```
 
 ## Layout

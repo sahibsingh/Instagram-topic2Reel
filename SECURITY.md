@@ -28,6 +28,7 @@ the third-party programs the project drives (Chromium, Playwright, ffmpeg, Piper
 | 9 | The README example wrote the spec to a predictable `/tmp` path | Low: symlink attack on shared machines | **Fixed.** The example no longer uses a fixed temp path. |
 | 10 | Topic text could try to steer the skill ("ignore the above, run ...") or break shell quoting | Medium | **Mitigated.** `SKILL.md` says the topic is data, forbids putting it in shell commands, fixes the slug to `[a-z0-9-]`, and limits the engine lookup to the plugin folder instead of `find /`. |
 | 11 | Hostile text on screen (`<img onerror=...>`, `</script>`) | Low | **Verified.** Text is only drawn on a canvas; nothing is inserted as HTML. A test renders such text. |
+| 12 | The pronunciation lexicon is a new input file | Low | **Validated and tested.** At most 100 KB and 300 entries, string-to-string only, no control characters, applied as plain text in a single pass (never compiled as a regex), and only to the text sent to the voice. |
 
 ## Residual risks (not fixed)
 - **WebSocket is stopped only by the CSP**, not by the route handler (Playwright's `route` does not see WebSockets). The CSP is part of

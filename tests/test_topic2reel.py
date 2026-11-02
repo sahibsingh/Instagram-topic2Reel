@@ -136,5 +136,44 @@ class Voice(unittest.TestCase):
                 self.assertGreater(w.getnframes() / w.getframerate(), 0.5)
 
 
+class Lexicon(unittest.TestCase):
+    def test_whole_words_only(self):
+        lex = {"फ्रेंड": "फ़्रेंड"}
+        self.assertEqual(t2r.apply_lexicon("फ्रेंड और फ्रेंड्स", lex), "फ़्रेंड और फ्रेंड्स")
+
+    def test_single_pass_no_cascade(self):
+        self.assertEqual(t2r.apply_lexicon("a b", {"a": "b", "b": "c"}), "b c")
+
+    def test_keys_are_literal_text_not_regex(self):
+        self.assertEqual(t2r.apply_lexicon("abc a.c", {"a.c": "X"}), "abc X")
+
+    def test_empty_lexicon_changes_nothing(self):
+        self.assertEqual(t2r.apply_lexicon("नमस्ते", None), "नमस्ते")
+        self.assertEqual(t2r.apply_lexicon("नमस्ते", {}), "नमस्ते")
+
+    def test_shipped_example_is_valid(self):
+        lex = t2r.load_lexicon(ROOT / "examples" / "lexicon" / "hinglish.json")
+        self.assertIn("फ्रेंड", lex)
+
+    def test_bad_lexicons_are_rejected(self):
+        with tempfile.TemporaryDirectory() as td:
+            def write(obj, name="l.json"):
+                f = Path(td, name); f.write_text(obj if isinstance(obj, str) else json.dumps(obj), encoding="utf-8"); return f
+            for name, obj in {"array": [1], "non-string value": {"a": 1}, "empty key": {"": "x"},
+                              "long value": {"a": "x" * 81}, "control char": {"a": "x\u0007"},
+                              "too many": {str(i): "x" for i in range(t2r.MAX_LEXICON_ENTRIES + 1)}}.items():
+                with self.subTest(name), self.assertRaises(t2r.SpecError):
+                    t2r.load_lexicon(write(obj))
+            with self.assertRaises(t2r.SpecError):
+                t2r.load_lexicon(write({"a": "x" * (t2r.MAX_LEXICON_BYTES + 5)}, "big.json"))
+
+    @unittest.skipUnless(PIPER_MODEL and Path(PIPER_MODEL).is_file(), "needs TOPIC2REEL_PIPER_MODEL")
+    def test_nukta_respelling_changes_the_phoneme_but_native_words_stay(self):
+        lex = {"फिट": "फ़िट"}
+        self.assertTrue(t2r.show_phonemes("फिट", PIPER_MODEL).startswith("pʰ"))
+        self.assertTrue(t2r.show_phonemes("फिट", PIPER_MODEL, lex).startswith("f"))
+        self.assertEqual(t2r.show_phonemes("फल", PIPER_MODEL, lex), t2r.show_phonemes("फल", PIPER_MODEL))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -62,6 +62,46 @@ def _text(path: str, v: object, errs: list[str], max_len: int, screen: bool = Tr
         errs.append(f"{path}: on-screen text must be Roman script (no Devanagari font is bundled); keep Devanagari only in 'voice'")
 
 
+MAX_LEXICON_BYTES, MAX_LEXICON_ENTRIES = 100_000, 300
+
+
+def load_lexicon(path: str | Path) -> dict[str, str]:
+    """Pronunciation lexicon: {"written form": "respelling used only for the voice"}. Plain strings, never regexes."""
+    p = Path(path).expanduser()
+    if p.stat().st_size > MAX_LEXICON_BYTES:
+        raise SpecError(f"lexicon file too large (limit {MAX_LEXICON_BYTES} bytes)")
+    data = json.loads(p.read_text(encoding="utf-8"))
+    if not isinstance(data, dict) or len(data) > MAX_LEXICON_ENTRIES:
+        raise SpecError(f"lexicon must be a JSON object with at most {MAX_LEXICON_ENTRIES} entries")
+    for k, v in data.items():
+        if not (isinstance(k, str) and isinstance(v, str) and 1 <= len(k) <= 40 and 1 <= len(v) <= 80):
+            raise SpecError(f"lexicon entry {k!r}: key must be 1-40 chars and value 1-80 chars, both strings")
+        if any(ord(c) < 32 for c in k + v):
+            raise SpecError(f"lexicon entry {k!r}: control characters are not allowed")
+    return data
+
+
+def apply_lexicon(text: str, lexicon: dict[str, str] | None) -> str:
+    """Replace whole words in one pass (no cascading). A Devanagari word is only matched when it is not
+    glued to more Devanagari, so an entry for फ्रेंड does not touch फ्रेंड्स."""
+    if not lexicon:
+        return text
+    keys = sorted(lexicon, key=len, reverse=True)
+    dev = "\u0900-\u097F"
+    rx = re.compile(f"(?<![{dev}])(" + "|".join(re.escape(k) for k in keys) + f")(?![{dev}])")
+    return rx.sub(lambda m: lexicon[m.group(1)], text)
+
+
+def show_phonemes(text: str, piper_model: str, lexicon: dict[str, str] | None = None) -> str:
+    """What Piper will actually say, as phonemes. Lets you check a pronunciation without listening."""
+    from piper import PiperVoice
+    model = Path(piper_model).expanduser().resolve()
+    if model.suffix != ".onnx" or not model.is_file():
+        raise SpecError("--phonemes needs --piper-model /path/to/<voice>.onnx")
+    voice = PiperVoice.load(str(model))
+    return " ".join("".join("".join(p) for p in voice.phonemize(w)) for w in apply_lexicon(text, lexicon).split())
+
+
 def validate_spec(spec: object) -> list[str]:
     errs: list[str] = []
     if not isinstance(spec, dict):
@@ -138,7 +178,8 @@ def _duration(path: Path) -> float:
     return float(r.stdout.strip())
 
 
-def synth_voice(spec: dict, mode: str, work: Path, piper_model: str | None, voice_dir: str | None) -> list[Path] | None:
+def synth_voice(spec: dict, mode: str, work: Path, piper_model: str | None, voice_dir: str | None,
+                lexicon: dict[str, str] | None = None) -> list[Path] | None:
     n = len(spec["scenes"])
     if mode == "none":
         return None
@@ -150,7 +191,7 @@ def synth_voice(spec: dict, mode: str, work: Path, piper_model: str | None, voic
         for i, sc in enumerate(spec["scenes"], 1):
             out = work / f"scene_{i}.wav"
             # the text goes after "--" so it can never be read as an option; no shell is involved
-            subprocess.run([sys.executable, "-m", "piper", "-m", str(model), "-f", str(out), "--", sc["voice"]],
+            subprocess.run([sys.executable, "-m", "piper", "-m", str(model), "-f", str(out), "--", apply_lexicon(sc["voice"], lexicon)],
                            check=True, timeout=PIPER_TIMEOUT, env=_child_env())
             files.append(out)
     elif mode == "dir":
@@ -211,7 +252,7 @@ def _render_env(spec_path: Path, durs: list[float], **extra: str) -> dict[str, s
 
 
 def generate(spec_path: str | Path, out_path: str | Path, voice: str = "none", piper_model: str | None = None,
-             voice_dir: str | None = None, music: bool = True) -> Path:
+             voice_dir: str | None = None, music: bool = True, lexicon_path: str | Path | None = None) -> Path:
     spec_path, out_path = Path(spec_path).resolve(), Path(out_path).resolve()
     if out_path.suffix.lower() != ".mp4":
         raise SpecError("output file must end with .mp4")
@@ -222,7 +263,8 @@ def generate(spec_path: str | Path, out_path: str | Path, voice: str = "none", p
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="topic2reel_") as td:
         work = Path(td)
-        voices = synth_voice(spec, voice, work, piper_model, voice_dir)
+        lexicon = load_lexicon(lexicon_path) if lexicon_path else None
+        voices = synth_voice(spec, voice, work, piper_model, voice_dir, lexicon)
         durs = [DEFAULT_SCENE] * len(spec["scenes"])
         if voices:
             durs = [max(MIN_SCENE, _duration(v) + LEAD_IN + TAIL) for v in voices]
@@ -302,9 +344,16 @@ def main() -> int:
     ap.add_argument("--piper-model", default=os.environ.get("TOPIC2REEL_PIPER_MODEL"))
     ap.add_argument("--voice-dir", default=os.environ.get("TOPIC2REEL_VOICE_DIR"))
     ap.add_argument("--no-music", action="store_true")
+    ap.add_argument("--lexicon", default=os.environ.get("TOPIC2REEL_LEXICON"), help="JSON file of respellings applied to the voice text only")
+    ap.add_argument("--phonemes", metavar="TEXT", help="print the phonemes Piper will say for TEXT (needs --piper-model)")
     a = ap.parse_args()
     if a.doctor:
         return doctor(a.piper_model)
+    if a.phonemes is not None:
+        try:
+            print(show_phonemes(a.phonemes, a.piper_model or "", load_lexicon(a.lexicon) if a.lexicon else None)); return 0
+        except (SpecError, OSError, json.JSONDecodeError) as e:
+            print(f"error: {e}", file=sys.stderr); return 1
     if not a.spec:
         ap.error("spec is required (or use --doctor)")
     try:
@@ -313,7 +362,7 @@ def main() -> int:
             print("OK" if not errs else "INVALID:\n  " + "\n  ".join(errs)); return 1 if errs else 0
         if a.preview:
             print("\n".join(map(str, preview(a.spec, a.preview)))); return 0
-        print("done:", generate(a.spec, a.out, a.voice, a.piper_model, a.voice_dir, not a.no_music)); return 0
+        print("done:", generate(a.spec, a.out, a.voice, a.piper_model, a.voice_dir, not a.no_music, a.lexicon)); return 0
     except (SpecError, subprocess.CalledProcessError, subprocess.TimeoutExpired, json.JSONDecodeError, OSError) as e:
         print(f"error: {e}", file=sys.stderr); return 1
 

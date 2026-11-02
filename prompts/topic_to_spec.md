@@ -30,7 +30,7 @@ Every scene has:
 - `highlight`: 1–2 words copied exactly from the headline that deserve a highlighter mark
 - `caption` (optional): a tiny takeaway pill, at most 48 characters, Roman script
 - `voice`: the spoken line for this scene, 1–2 short sentences (about 8–18 words), natural spoken Hindi
-  written in **Devanagari**. Write English loanwords phonetically in Devanagari (प्रोटीन, ग्लो).
+  written in **Devanagari**. Write English loanwords phonetically in Devanagari (प्रोटीन, ग्लो). Use the nukta for the f and z sounds in loanwords (फ़िट, फ़्रेंड, ज़रूर); without it the voice says pʰ and j.
   Write numbers as words (ढाई, सात से आठ). No emojis, no hashtags, no symbols in `voice`.
 
 Scene types and their extra fields:

@@ -8,7 +8,8 @@
    and window.DURS (seconds per scene). renderAt(t) is a pure function of time. */
 const W = 1080, H = 1920, TAU = Math.PI * 2;
 const cv = document.getElementById('c'), ctx = cv.getContext('2d');
-const FONT = 'Inter, "DejaVu Sans", sans-serif';
+const FONT = 'Inter, "Noto Color Emoji", "DejaVu Sans", sans-serif';   // colour emoji font before others, or some emoji fall back to a monochrome font
+const EMOJI_FONT = '"Noto Color Emoji", sans-serif';
 const INK = '#2B1B3D';
 const PAL = ['#FFE1E9', '#FFF0C2', '#E7DEFF', '#D6EEFF', '#FFD9E8', '#D7F6E3', '#FFE8D1', '#DFF3FF'];
 const MARK = ['#FFD23F', '#FF9DB0', '#B9A3FF', '#7FD6FF', '#8EE3B0'];
@@ -50,7 +51,10 @@ function label(text, x, y, size, color = INK, weight = 800, alpha = 1) {
 }
 function emoji(ch, x, y, size, s = 1, alpha = 1) {
   ctx.save(); ctx.globalAlpha = alpha; ctx.translate(x, y); ctx.scale(s, s);
-  font(size, 800); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(ch, 0, size * .05); ctx.restore();
+  ctx.font = `${size}px ${EMOJI_FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';   // weight 400: a bold request makes Chromium smear colour emoji
+  ctx.fillStyle = '#000';   // colour emoji inherit the fill's alpha, so never reuse a translucent fill from earlier drawing
+  if (size >= 150) shadow('rgba(43,27,61,.38)', 22, 10);   // separates the emoji from any disc colour
+  ctx.fillText(ch, 0, size * .05); ctx.restore();
 }
 function fitSize(text, maxW, size, weight = 800, min = 22) {
   font(size, weight); const w = ctx.measureText(text).width;
@@ -131,14 +135,14 @@ T.hook = (sc, t, d, i) => {
   const u = t / d, cx = 540, cy = 1080, p = eob(win(t, .4, .6)), st = sc.stamp;
   if (p > 0) {
     withScale(cx, cy, p, () => { shadow('rgba(43,27,61,.2)', 40, 18); circ(0, 0, 280, MARK[i % MARK.length]); noShadow(); circ(0, 0, 266, null, 'rgba(255,255,255,.75)', 10); });
-    emoji(sc.emoji || '✨', cx, cy + 12 * Math.sin(t * 3), 290, p);
+    emoji(sc.emoji || '✨', cx, cy + 12 * Math.sin(t * 3), 240, p);
   }
   if (st === 'no') {
-    const xp = eo(win(u, .3, .12));
-    if (xp > 0) {
-      ctx.save(); ctx.translate(cx, cy); ctx.scale(xp, xp); ctx.strokeStyle = '#E5374F'; ctx.lineWidth = 48; ctx.lineCap = 'round';
-      ctx.beginPath(); ctx.moveTo(-200, -200); ctx.lineTo(200, 200); ctx.moveTo(200, -200); ctx.lineTo(-200, 200); ctx.stroke(); ctx.restore();
-    }
+    const nb = eob(win(u, .3, .1));
+    if (nb > 0) withScale(cx + 210, cy - 210, nb, () => {
+      circ(0, 0, 66, '#E5374F'); ctx.strokeStyle = '#fff'; ctx.lineWidth = 15; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(-24, -24); ctx.lineTo(24, 24); ctx.moveTo(24, -24); ctx.lineTo(-24, 24); ctx.stroke();
+    });
   }
   if (st === 'yes') {
     const cb = eob(win(u, .3, .1));
