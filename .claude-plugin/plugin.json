@@ -4,5 +4,17 @@
   "description": "Instagram Topic2Reel: turn a topic into a 9:16 reel with animated scenes, Hindi voiceover, music and a ready caption. Runs locally, no API key.",
   "homepage": "https://github.com/sahibsingh/Instagram-topic2Reel",
   "repository": "https://github.com/sahibsingh/Instagram-topic2Reel",
-  "license": "MIT"
+  "license": "MIT",
+  "author": {
+    "name": "sahibsingh",
+    "url": "https://github.com/sahibsingh"
+  },
+  "keywords": [
+    "instagram",
+    "reels",
+    "video",
+    "hindi",
+    "text-to-speech",
+    "short-form"
+  ]
 }

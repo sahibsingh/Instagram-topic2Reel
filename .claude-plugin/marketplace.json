@@ -7,7 +7,12 @@
     {
       "name": "topic2reel",
       "source": "./",
-      "description": "Topic to Instagram Reel: animated scenes, Hindi voiceover, music and caption. Local, no API key."
+      "description": "Topic to Instagram Reel: animated scenes, Hindi voiceover, music and caption. Local, no API key.",
+      "author": {
+        "name": "sahibsingh",
+        "url": "https://github.com/sahibsingh"
+      }
     }
-  ]
+  ],
+  "description": "Topic2Reel: turn a topic into a ready-to-post Instagram Reel with a Claude Code plugin. Local, free, no API key."
 }
