@@ -1,0 +1,1 @@
+{ "permissions": { "allow": ["Bash(gh api -X PUT repos/sahibsingh/Instagram-topic2Reel/pulls/* *)"] } }
